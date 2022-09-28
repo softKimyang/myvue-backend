@@ -21,6 +21,7 @@ public class BoardController {
 
     @GetMapping("/board/list")
     public Header<List<BoardDto>> boardList(@PageableDefault(sort = {"idx"}) Pageable pageable){
+        System.out.println("boardController paeable: " + pageable.toString());
         return boardService.getBoardList(pageable);
     }
 

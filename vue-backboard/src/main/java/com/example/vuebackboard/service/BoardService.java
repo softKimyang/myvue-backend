@@ -20,23 +20,23 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class BoardService {
+
     private final BoardRepository boardRepository;
 
+    /**
+     * 게시글 목록 가져오기
+     */
     public Header<List<BoardDto>> getBoardList(Pageable pageable) {
         List<BoardDto> dtos = new ArrayList<>();
 
         Page<BoardEntity> boardEntities = boardRepository.findAllByOrderByIdxDesc(pageable);
-        for (BoardEntity entity : boardEntities) {
-            BoardDto dto = BoardDto.builder()
-                    .idx(entity.getIdx())
-                    .author(entity.getAuthor())
-                    .title(entity.getTitle())
-                    .contents(entity.getContents())
-                    .createdAt(entity.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
-                    .build();
-
-            dtos.add(dto);
-        }
+        boardEntities.forEach(entity -> dtos.add(BoardDto.builder()
+                .idx(entity.getIdx())
+                .title(entity.getTitle())
+                .contents(entity.getContents())
+                .author(entity.getAuthor())
+                .createdAt(entity.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
+                .build()));
 
         Pagination pagination = new Pagination(
                 (int) boardEntities.getTotalElements()
@@ -44,46 +44,52 @@ public class BoardService {
                 , pageable.getPageSize()
                 , 10
         );
-        System.out.println("Pagination: " + pagination.toString());
-
+        System.out.println("boardService pagination: " + pagination);
         return Header.OK(dtos, pagination);
     }
-    public BoardDto getBoard(Long id){
-        System.out.println("getBoard id ..... " + id);
-        BoardEntity entity = boardRepository.findById(id).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-        System.out.println("getBoard entity.getTitle()..... " + entity.getTitle());
 
+    /**
+     * 게시글 가져오기
+     */
+    public BoardDto getBoard(Long id) {
+        BoardEntity entity = boardRepository.findById(id).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
         return BoardDto.builder()
                 .idx(entity.getIdx())
-                .author(entity.getAuthor())
                 .title(entity.getTitle())
                 .contents(entity.getContents())
+                .author(entity.getAuthor())
                 .createdAt(entity.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
                 .build();
     }
 
-    public BoardEntity create(BoardDto dto){
+    /**
+     * 게시글 등록
+     */
+    public BoardEntity create(BoardDto boardDto) {
         BoardEntity entity = BoardEntity.builder()
-                .idx(dto.getIdx())
-                .author(dto.getAuthor())
-                .title(dto.getTitle())
-                .contents(dto.getContents())
+                .title(boardDto.getTitle())
+                .contents(boardDto.getContents())
+                .author(boardDto.getAuthor())
                 .createdAt(LocalDateTime.now())
                 .build();
         return boardRepository.save(entity);
     }
 
-    public BoardEntity update(BoardDto dto){
-        BoardEntity entity = boardRepository.findById(dto.getIdx()).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-        entity.setTitle(dto.getTitle());
-        entity.setContents(dto.getContents());
+    /**
+     * 게시글 수정
+     */
+    public BoardEntity update(BoardDto boardDto) {
+        BoardEntity entity = boardRepository.findById(boardDto.getIdx()).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+        entity.setTitle(boardDto.getTitle());
+        entity.setContents(boardDto.getContents());
         return boardRepository.save(entity);
     }
 
-    public void delete(Long id){
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>  delete id ..... " + id);
+    /**
+     * 게시글 삭제
+     */
+    public void delete(Long id) {
         BoardEntity entity = boardRepository.findById(id).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-        System.out.println("service delete entity.getTitle()..... " + entity.getTitle());
         boardRepository.delete(entity);
     }
 }

@@ -61,7 +61,7 @@ public class Pagination {
         //현재 블럭
         block = (int) Math.ceil((this.page * 1.0) / blockSize);
 
-        //if(block < 1) block = 1
+        if(block < 1) block = 1;
 
         //블럭 시작 페이지
         startPage = ((block - 1) * blockSize + 1);
@@ -84,7 +84,7 @@ public class Pagination {
         // 다음 블럭 validation
         if (nextBlock > totalPageCnt) nextBlock = totalPageCnt;
 
-        //if(this.page < 1) this.page = 1
+       // if(this.page < 1) this.page = 1;
 
         startIndex = (this.page - 1) * this.pageSize;
     }
